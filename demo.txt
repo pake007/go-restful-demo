@@ -1,0 +1,112 @@
+# 使用openweathermap.com的服务提供REST风格的天气API
+
+## 实现要求
+
+* 语言 Go
+* 框架 net/http
+* JSON处理 encoding/json
+* 单元测试 testing
+* 后端数据库 Redis (推荐radix或者redigo http://redis.io/clients#go)
+
+Go 查看文档的方法
+
+安装好Go以后，运行`godoc -http ':6060'`，在浏览器中打开 http://localhost:6060/
+
+## HTTP API 列表
+
+* POST /location
+* GET /location
+* GET /location/{name}
+* DELETE /location/{name}
+
+以下例子均为省略了Header的HTTP协议
+### POST /location
+
+增加支持的城市，如果已存在于数据库，返回409，否则返回201
+
+例子1 
+
+POST /location
+{ "name": "Shanghai" }
+
+201 Created
+
+例子2
+
+POST /location
+{ "name": "Shanghai" }
+
+201 Created
+
+POST /location
+{ "name": "Shanghai" }
+
+409 Conflicted
+{ "error": "Name already exists" }
+
+### GET /location 返回数据库中的所有城市
+
+例子1 
+
+GET /location
+
+200 OK
+[]
+
+例子2
+
+POST /location
+{ "name": "Shanghai" }
+
+201 Created
+
+POST /location
+{ "name": "Beijing" }
+
+201 Created
+
+GET /location
+
+200 OK
+["Shanghai", "Beijing"]
+
+
+### GET /location/{name} 查询openweathermap.com，返回结果，因为天气数据更新不频繁，可缓存在数据库中，保留1个小时
+不需要考虑查询openweathermap.com返回错误的情况
+
+例子1
+
+GET /location/Shanghai
+
+200 OK
+{
+    "weather": [
+        {
+            "description": "few clouds",
+            "icon": "02d",
+            "id": 801,
+            "main": "Clouds"
+        }
+    ]
+}
+
+### DELETE /location/{name}
+
+例子1
+
+DELETE /location/Shanghai
+
+200 OK
+
+## openweathermap.com API
+
+例子
+
+curl "api.openweathermap.org/data/2.5/weather?q=Shanghai&APPID=f87dfd3af38ed44f157296b7150caacc"
+
+{"coord":{"lon":121.46,"lat":31.22},"weather":[{"id":801,"main":"Clouds","description":"few clouds","icon":"02d"}],"base":"cmc stations","main":{"temp":286.15,"pressure":1019,"humidity":71,"temp_min":286.15,"temp_max":286.15},"wind":{"speed":7,"deg":140},"clouds":{"all":20},"dt":1458608400,"sys":{"type":1,"id":7452,"message":0.0091,"country":"CN","sunrise":1458597323,"sunset":1458641219},"id":1796236,"name":"Shanghai","cod":200}
+
+## 参数
+
+* q: 城市名
+* APPID: f87dfd3af38ed44f157296b7150caacc 是我预先申请的ID，限制是每10分钟600次，可满足开发要求
