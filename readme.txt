@@ -4,3 +4,4 @@ create: curl -i -H "Content-Type: application/json" -d '{"name": "Shanghai"}' ht
 
 delete: curl -i -X DELETE "http://localhost:8080/location/Shanghai"
 
+get: curl -i http://localhost:8080/location/Shanghai

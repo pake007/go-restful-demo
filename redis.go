@@ -24,7 +24,7 @@ func locationExists(name string) bool {
 func createLocation(name string) {
   addErr := client.Cmd("SADD", "cities", name).Err
   HandleError(addErr)
-  setErr := client.Cmd("SET", "city:" + name, "").Err
+  setErr := client.Cmd("HMSET", "city:" + name, "name", name).Err
   HandleError(setErr)
 }
 
@@ -41,4 +41,25 @@ func listLocations() []string {
   ls, err := client.Cmd("SMEMBERS", "cities").List()
   HandleError(err)
   return ls
+}
+
+// check if the location weather info expired (1 hour)
+func weatherExpired(name string) bool {
+  now := time.Now()
+  updatedAtStr := client.Cmd("HMGET", "city:" + name, "updated_at").String()
+  updatedAt := time.Parse(time.RFC3339, updatedAtStr)
+  expireAt := updatedAt.Add(1 * time.Hour)
+  return now.After(expireAt)
+}
+
+// store weather info in database
+func storeWeather(name string, weather string) {
+  err := client.Cmd("HMSET", "city:" + name, "weather", weather, "updated_at", time.Now().Format(time.RFC3339))
+  HandleError(err)
+}
+
+// get weather info from database
+func readWeather(name string) {
+  weather := client.Cmd("HMGET", "city:" + name, "weather").String()
+  return weather
 }
