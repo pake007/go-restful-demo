@@ -6,6 +6,7 @@ import (
   "io/ioutil"
   "encoding/json"
   "net/http"
+  "strings"
 )
 
 const (
@@ -42,11 +43,11 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
     if err := json.Unmarshal(body, &city); err != nil || len(city.Name) == 0 {
       responseUnprocessable(w)
     } else {
-      exists := locationExists(city.Name)
+      exists := locationExists(strings.ToLower(city.Name))
       if exists {
         responseConflict(w)
       } else {
-        createLocation(city.Name)
+        createLocation(strings.ToLower(city.Name))
         responseCreated(w)
       }
     }
@@ -96,9 +97,9 @@ func locationHandler(w http.ResponseWriter, r *http.Request) {
   }
   switch r.Method {
     case "GET":
-      getLocationWeatherHandler(w, name)
+      getLocationWeatherHandler(w, strings.ToLower(name))
     case "DELETE":
-      deleteLocationHandler(w, name)
+      deleteLocationHandler(w, strings.ToLower(name))
     default:
       fmt.Println("Not a valid action!")
       return
