@@ -1,4 +1,4 @@
-package main
+package weatherapi
 
 import (
   "fmt"
@@ -7,14 +7,24 @@ import (
   "io/ioutil"
 )
 
-func requestWeatherAPI(name string) []byte {
+const (
+  ApiAddress = "http://api.openweathermap.org/data/2.5/weather?APPID="
+  ApiKey = "f87dfd3af38ed44f157296b7150caacc"
+)
+
+
+func RequestWeather(name string) []byte {
   fmt.Println("fetch remote weather of " + name)
   var f interface{}
   var weatherResp []byte 
   resp, _ := http.Get(ApiAddress + ApiKey + "&q=" + name)
+  // resp.Body is *http.bodyEOFSignal type, read its bytes
   body, _ := ioutil.ReadAll(resp.Body)
+  // body is []byte type, unmarshal it to f object
   err := json.Unmarshal(body, &f)
-  HandleError(err)
+  if err != nil {
+    panic(err)
+  }
   m := f.(map[string]interface{})
   for k, v := range m {
     if k == "weather" {

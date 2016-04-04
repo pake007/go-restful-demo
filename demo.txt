@@ -15,7 +15,7 @@ Go 查看文档的方法
 ## HTTP API 列表
 
 * POST /location
-* GET /location
+* GET /locations
 * GET /location/{name}
 * DELETE /location/{name}
 
@@ -48,7 +48,7 @@ POST /location
 
 例子1 
 
-GET /location
+GET /locations
 
 200 OK
 []
@@ -65,7 +65,7 @@ POST /location
 
 201 Created
 
-GET /location
+GET /locations
 
 200 OK
 ["Shanghai", "Beijing"]

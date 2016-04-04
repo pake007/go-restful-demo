@@ -7,17 +7,8 @@ import (
   "encoding/json"
   "net/http"
   "strings"
+  "weatherdemo/weatherapi"
 )
-
-const (
-  ApiAddress = "http://api.openweathermap.org/data/2.5/weather?APPID="
-  ApiKey = "f87dfd3af38ed44f157296b7150caacc"
-)
-
-type City struct {
-  Name string `json:"name"`
-}
-
 
 // index
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +49,11 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // show location weather info
-func getLocationWeatherHandler(w http.ResponseWriter, name string) {
+func getWeatherHandler(w http.ResponseWriter, r *http.Request) {
+  name := getLoctionName(r)
+  if len(name) == 0 {
+    return
+  }
   if !locationExists(name) {
     responseNotfound(w)
     return
@@ -67,7 +62,7 @@ func getLocationWeatherHandler(w http.ResponseWriter, name string) {
   existingWeather := readWeather(name)
   // if no weather info in database or weather info expired (> 1 hour), request openweathermap api
   if expired || len(existingWeather) == 0 {
-    weatherResp := requestWeatherAPI(name)
+    weatherResp := weatherapi.RequestWeather(name)
     storeWeather(name, string(weatherResp))
     responseWeather(w, weatherResp)   
   } else {
@@ -77,8 +72,11 @@ func getLocationWeatherHandler(w http.ResponseWriter, name string) {
 }
 
 // delete
-func deleteLocationHandler(w http.ResponseWriter, name string) {
-  fmt.Println("Delete city " + name)
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+  name := getLoctionName(r)
+  if len(name) == 0 {
+    return
+  }
   exists := locationExists(name)
   if exists {
     deleteLocation(name)
@@ -88,39 +86,25 @@ func deleteLocationHandler(w http.ResponseWriter, name string) {
   }
 }
 
-// GET or DELETE
+// GET or DELETE dispatcher
 func locationHandler(w http.ResponseWriter, r *http.Request) {
-  name := r.URL.Path[len("/location/"):]
-  if len(name) == 0 {
-    fmt.Println("Not a valid name!")
-    return
-  }
   switch r.Method {
     case "GET":
-      getLocationWeatherHandler(w, strings.ToLower(name))
+      getWeatherHandler(w, r)
     case "DELETE":
-      deleteLocationHandler(w, strings.ToLower(name))
+      deleteHandler(w, r)
     default:
       fmt.Println("Not a valid action!")
       return
   }
 }
 
-func HandleError(err error) {
-  if err != nil {
-    panic(err)
+// ------------ helper method for get or delete, parse the location name from url ------------
+func getLoctionName(r *http.Request) string {
+  name := r.URL.Path[len("/location/"):]
+  if len(name) == 0 {
+    fmt.Println("Not a valid name!")
+    return ""
   }
-}
-
-func main() {  
-  if dbErr != nil {
-    fmt.Println("Can't connect to redis:", dbErr)
-    return
-  }
-  defer client.Close()
-
-  http.HandleFunc("/locations", indexHandler)
-  http.HandleFunc("/location", createHandler)
-  http.HandleFunc("/location/", locationHandler)
-  http.ListenAndServe(":8080", nil)
+  return strings.ToLower(name)
 }
