@@ -16,7 +16,7 @@ func responseUnprocessable(w http.ResponseWriter) {
   w.Header().Set("Content-Type", "application/json; charset=UTF-8")
   w.WriteHeader(422)
   w.Write(js)
-  w.Write([]byte("\n"))  // just for view convinience
+  //w.Write([]byte("\n"))  // just for view convinience
 }
 
 func responseConflict(w http.ResponseWriter) {
@@ -26,7 +26,7 @@ func responseConflict(w http.ResponseWriter) {
   w.Header().Set("Content-Type", "application/json; charset=UTF-8")
   w.WriteHeader(http.StatusConflict)
   w.Write(js)
-  w.Write([]byte("\n"))
+  //w.Write([]byte("\n"))
 }
 
 func responseCreated(w http.ResponseWriter) {
@@ -46,5 +46,11 @@ func responseNotfound(w http.ResponseWriter) {
   w.Header().Set("Content-Type", "application/json; charset=UTF-8")
   w.WriteHeader(http.StatusNotFound)
   w.Write(js)
-  w.Write([]byte("\n"))
+  //w.Write([]byte("\n"))
+}
+
+func responseWeather(w http.ResponseWriter, weather []byte) {
+  responseOK(w)
+  w.Write(weather)
+  //w.Write([]byte("\n"))
 }

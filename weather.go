@@ -16,14 +16,6 @@ type City struct {
   Name string `json:"name"`
 }
 
-// {"id":500,"main":"Rain","description":"light rain","icon":"10d"}
-type Weather struct {
-  Id int32 `json:"id"`
-  Main string `json:"main"`
-  Description string `json:"description"`
-  Icon string `json:"icon"`
-}
-
 
 // index
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,31 +56,21 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // show location weather info
-func getLocationHandler(w http.ResponseWriter, name string) {
-  fmt.Println("Get weather of " + name)
+func getLocationWeatherHandler(w http.ResponseWriter, name string) {
+  if !locationExists(name) {
+    responseNotfound(w)
+    return
+  }
   expired := weatherExpired(name)
   existingWeather := readWeather(name)
   // if no weather info in database or weather info expired (> 1 hour), request openweathermap api
-  if expired || lend(existingWeather) == 0 {
-    resp, _ := http.Get("http://api.openweathermap.org/data/2.5/weather?APPID=" + KEY + "&q=" + name)
-    body, _ := ioutil.ReadAll(resp.Body)
-    var f interface{}
-    err := json.Unmarshal(body, &f)
-    HandleError(err)
-    m := f.(map[string]interface{})
-    for k, v := range m {
-      if k == "weather" {
-        for _, vv := range v.([]interface{}) {
-          fmt.Println(vv.(map[string]interface{}))
-        }
-        break
-      }  
-    }
-    storeWeather(name, weather)
-    // responseWeather(weather)   
+  if expired || len(existingWeather) == 0 {
+    weatherResp := requestWeatherAPI(name)
+    storeWeather(name, string(weatherResp))
+    responseWeather(w, weatherResp)   
   } else {
-    fmt.Println("use existing weather")
-    // responseWeather(existingWeather)
+    fmt.Println("use existing weather of " + name)
+    responseWeather(w, []byte(existingWeather))
   }
 }
 
@@ -113,7 +95,7 @@ func locationHandler(w http.ResponseWriter, r *http.Request) {
   }
   switch r.Method {
     case "GET":
-      getLocationHandler(w, name)
+      getLocationWeatherHandler(w, name)
     case "DELETE":
       deleteLocationHandler(w, name)
     default:
