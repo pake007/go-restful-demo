@@ -11,7 +11,7 @@ func requestWeatherAPI(name string) []byte {
   fmt.Println("fetch remote weather of " + name)
   var f interface{}
   var weatherResp []byte 
-  resp, _ := http.Get("http://api.openweathermap.org/data/2.5/weather?APPID=" + KEY + "&q=" + name)
+  resp, _ := http.Get(ApiAddress + ApiKey + "&q=" + name)
   body, _ := ioutil.ReadAll(resp.Body)
   err := json.Unmarshal(body, &f)
   HandleError(err)

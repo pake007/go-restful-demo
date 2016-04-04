@@ -9,7 +9,8 @@ import (
 )
 
 const (
-  KEY = "f87dfd3af38ed44f157296b7150caacc"
+  ApiAddress = "http://api.openweathermap.org/data/2.5/weather?APPID="
+  ApiKey = "f87dfd3af38ed44f157296b7150caacc"
 )
 
 type City struct {
