@@ -8,12 +8,13 @@ import (
   "net/http"
   "strings"
   "weatherdemo/weatherapi"
+  "weatherdemo/redis"
 )
 
 // index
 func indexHandler(w http.ResponseWriter, r *http.Request) {
   if r.Method == "GET" {
-    locations := listLocations()
+    locations := redis.ListLocations()
     err := json.NewEncoder(w).Encode(locations)
     HandleError(err)
   } else {
@@ -34,11 +35,11 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
     if err := json.Unmarshal(body, &city); err != nil || len(city.Name) == 0 {
       responseUnprocessable(w)
     } else {
-      exists := locationExists(strings.ToLower(city.Name))
+      exists := redis.LocationExists(strings.ToLower(city.Name))
       if exists {
         responseConflict(w)
       } else {
-        createLocation(strings.ToLower(city.Name))
+        redis.CreateLocation(strings.ToLower(city.Name))
         responseCreated(w)
       }
     }
@@ -54,16 +55,16 @@ func getWeatherHandler(w http.ResponseWriter, r *http.Request) {
   if len(name) == 0 {
     return
   }
-  if !locationExists(name) {
+  if !redis.LocationExists(name) {
     responseNotfound(w)
     return
   }
-  expired := weatherExpired(name)
-  existingWeather := readWeather(name)
+  expired := redis.WeatherExpired(name)
+  existingWeather := redis.ReadWeather(name)
   // if no weather info in database or weather info expired (> 1 hour), request openweathermap api
   if expired || len(existingWeather) == 0 {
     weatherResp := weatherapi.RequestWeather(name)
-    storeWeather(name, string(weatherResp))
+    redis.StoreWeather(name, string(weatherResp))
     responseWeather(w, weatherResp)   
   } else {
     fmt.Println("use existing weather of " + name)
@@ -77,9 +78,9 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
   if len(name) == 0 {
     return
   }
-  exists := locationExists(name)
+  exists := redis.LocationExists(name)
   if exists {
-    deleteLocation(name)
+    redis.DeleteLocation(name)
     responseOK(w)
   } else {
     responseNotfound(w)

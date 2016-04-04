@@ -1,6 +1,7 @@
 package main
 
 import (
+  "github.com/fzzy/radix/redis"
   "fmt"
   "testing"
   "net/http"
@@ -13,7 +14,12 @@ import (
   "time"
 )
 
+const (
+  ADDRESS = "localhost:6379"
+)
+
 var (
+  client, dbErr = redis.DialTimeout("tcp", ADDRESS, time.Duration(10)*time.Second)
   server   *httptest.Server
   reader   io.Reader
   url      string

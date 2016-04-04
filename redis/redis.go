@@ -1,4 +1,4 @@
-package main
+package redis
 
 import (
   "github.com/fzzy/radix/redis"
@@ -14,14 +14,14 @@ var (
 )
 
 // check if the location already stored in database
-func locationExists(name string) bool {
+func LocationExists(name string) bool {
   r, err := client.Cmd("EXISTS", "city:" + name).Bool()
   HandleError(err)
   return r
 }
 
 // create a location entity in database
-func createLocation(name string) {
+func CreateLocation(name string) {
   addErr := client.Cmd("SADD", "cities", name).Err
   HandleError(addErr)
   setErr := client.Cmd("HMSET", "city:" + name, "name", name).Err
@@ -29,7 +29,7 @@ func createLocation(name string) {
 }
 
 // delete a location from database
-func deleteLocation(name string) {
+func DeleteLocation(name string) {
   delErr := client.Cmd("DEL", "city:" + name).Err
   HandleError(delErr)
   remErr := client.Cmd("SREM", "cities", name).Err
@@ -37,14 +37,14 @@ func deleteLocation(name string) {
 }
 
 // list all locations in database
-func listLocations() []string {
+func ListLocations() []string {
   ls, err := client.Cmd("SMEMBERS", "cities").List()
   HandleError(err)
   return ls
 }
 
 // check if the location weather info expired (1 hour)
-func weatherExpired(name string) bool {
+func WeatherExpired(name string) bool {
   now := time.Now()
   results, err := client.Cmd("HMGET", "city:" + name, "updated_at").List()  // weird the HMGET return a list result
   if err != nil {
@@ -57,16 +57,22 @@ func weatherExpired(name string) bool {
 }
 
 // store weather info in database
-func storeWeather(name string, weather string) {
+func StoreWeather(name string, weather string) {
   err := client.Cmd("HMSET", "city:" + name, "weather", weather, "updated_at", time.Now().Format(time.RFC3339)).Err
   HandleError(err)
 }
 
 // get weather info from database
-func readWeather(name string) string {
+func ReadWeather(name string) string {
   results, err := client.Cmd("HMGET", "city:" + name, "weather").List()
   if err != nil {
     return ""
   }
   return results[0]
+}
+
+func HandleError(err error) {
+  if err != nil {
+    panic(err)
+  }
 }
