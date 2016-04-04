@@ -183,6 +183,21 @@ func TestShowLocationWeather(t *testing.T) {
   if res.StatusCode != 200 {
     t.Errorf("Expected: %d, Got %d", 200, res.StatusCode)
   }
+
+  body, _ := ioutil.ReadAll(res.Body)
+  var m map[string]interface{}
+  json.Unmarshal(body, &m)
+
+  var found = false
+  for k, _ := range m {
+    if k == "weather" {
+      found = true
+    }
+  }
+
+  if !found {
+    t.Errorf("Expected weather condition, Got nothing")
+  }
 }
 
 func TestShowLocationWeatherNotExpired(t *testing.T) {
@@ -215,5 +230,20 @@ func TestShowLocationWeatherExpired(t *testing.T) {
 
   if res.StatusCode != 200 {
     t.Errorf("Expected: %d, Got %d", 200, res.StatusCode)
+  }
+
+  body, _ := ioutil.ReadAll(res.Body)
+  var m map[string]interface{}
+  json.Unmarshal(body, &m)
+
+  var found = false
+  for k, _ := range m {
+    if k == "weather" {
+      found = true
+    }
+  }
+
+  if !found {
+    t.Errorf("Expected weather condition, Got nothing")
   }
 }
