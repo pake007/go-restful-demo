@@ -7,8 +7,8 @@ import (
   "encoding/json"
   "net/http"
   "strings"
-  "weatherdemo/weatherapi"
-  "weatherdemo/redis"
+  "go-restful-demo/weatherapi"
+  "go-restful-demo/redis"
 )
 
 // index

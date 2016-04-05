@@ -23,7 +23,7 @@ var (
   server   *httptest.Server
   reader   io.Reader
   url      string
-  weatherStr = "{\"weather\":[{\"description\":\"clear sky\",\"icon\":\"01d\",\"id\":800,\"main\":\"Clear\"}]}"
+  cachedWeatherStr = "{\"weather\":[{\"description\":\"fake\",\"icon\":\"fake\",\"id\":100,\"main\":\"fake\"}]}"
 )
 
 func init() {
@@ -65,7 +65,7 @@ func assumeLocationExists() {
 
 func assumeLocationWeatherNotExpired() {
   // assume the weather just updated now
-  client.Cmd("HMSET", "city:fakecity", "weather", weatherStr)
+  client.Cmd("HMSET", "city:fakecity", "weather", cachedWeatherStr)
   client.Cmd("HMSET", "city:fakecity", "updated_at", time.Now().Format(time.RFC3339))
 }
 
@@ -171,7 +171,7 @@ func TestShowLocationNotFound(t *testing.T) {
   }
 }
 
-// test show location weather, the location is already in db
+// test show location weather, the location is already in db, so request the weather api
 func TestShowLocationWeather(t *testing.T) {
   assumeLocationExists()
   prepareGetWeatherRequest()
@@ -200,6 +200,7 @@ func TestShowLocationWeather(t *testing.T) {
   }
 }
 
+// test show location weather, the weather info not expired yet, just return the cache
 func TestShowLocationWeatherNotExpired(t *testing.T) {
   assumeLocationExists()
   assumeLocationWeatherNotExpired()
@@ -214,11 +215,12 @@ func TestShowLocationWeatherNotExpired(t *testing.T) {
   body, _ := ioutil.ReadAll(res.Body)
   bodyStr := string(body)
 
-  if bodyStr != weatherStr {
-    t.Errorf("Expected response weather: %s, Got %s", weatherStr, bodyStr)
+  if bodyStr != cachedWeatherStr {
+    t.Errorf("Expected response weather: %s, Got %s", cachedWeatherStr, bodyStr)
   }
 }
 
+// test show location weather, the weather info exists but expired, will request the weather api again
 func TestShowLocationWeatherExpired(t *testing.T) {
   assumeLocationExists()
   assumeLocationWeatherExpired()
@@ -245,5 +247,9 @@ func TestShowLocationWeatherExpired(t *testing.T) {
 
   if !found {
     t.Errorf("Expected weather condition, Got nothing")
+  }
+
+  if string(body) == cachedWeatherStr {
+    t.Errorf("Expected new weather condition, Got cached")
   }
 }
