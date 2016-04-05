@@ -7,8 +7,8 @@ import (
   "encoding/json"
   "net/http"
   "strings"
-  "go-restful-demo/weatherapi"
-  "go-restful-demo/redis"
+  "github.com/pake007/go-restful-demo/weatherapi"
+  "github.com/pake007/go-restful-demo/redis"
 )
 
 // index
