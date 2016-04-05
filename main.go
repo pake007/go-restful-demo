@@ -17,8 +17,8 @@ func HandleError(err error) {
 }
 
 func main() {  
-  dbErr := redis.StartRedisClient()
-  if dbErr != nil {
+  err := redis.StartRedisClient()
+  if err != nil {
     fmt.Println("Can't connect to redis:", dbErr)
     return
   }

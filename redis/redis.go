@@ -10,11 +10,10 @@ const (
 )
 
 var (
-  client, dbErr
+  client, dbErr = redis.DialTimeout("tcp", ADDRESS, time.Duration(10)*time.Second)
 )
 
 func StartRedisClient() error {
-  client, dbErr = redis.DialTimeout("tcp", ADDRESS, time.Duration(10)*time.Second)
   return dbErr
 } 
 
