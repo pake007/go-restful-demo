@@ -10,8 +10,17 @@ const (
 )
 
 var (
-  client, dbErr = redis.DialTimeout("tcp", ADDRESS, time.Duration(10)*time.Second)
+  client, dbErr
 )
+
+func StartRedisClient() error {
+  client, dbErr = redis.DialTimeout("tcp", ADDRESS, time.Duration(10)*time.Second)
+  return dbErr
+} 
+
+func CloseRedisClient() {
+  client.Close()
+}
 
 // check if the location already stored in database
 func LocationExists(name string) bool {

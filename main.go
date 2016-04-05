@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "net/http"
+  "github.com/pake007/go-restful-demo/redis"
 )
 
 type City struct {
@@ -16,11 +17,12 @@ func HandleError(err error) {
 }
 
 func main() {  
+  dbErr := redis.StartRedisClient()
   if dbErr != nil {
     fmt.Println("Can't connect to redis:", dbErr)
     return
   }
-  defer client.Close()
+  defer redis.CloseRedisClient()
 
   http.HandleFunc("/locations", indexHandler)
   http.HandleFunc("/location", createHandler)
