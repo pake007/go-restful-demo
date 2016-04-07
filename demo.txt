@@ -102,11 +102,11 @@ DELETE /location/Shanghai
 
 例子
 
-curl "api.openweathermap.org/data/2.5/weather?q=Shanghai&APPID=f87dfd3af38ed44f157296b7150caacc"
+curl "api.openweathermap.org/data/2.5/weather?q=Shanghai&APPID=xxxxxxxxxxxxx"
 
 {"coord":{"lon":121.46,"lat":31.22},"weather":[{"id":801,"main":"Clouds","description":"few clouds","icon":"02d"}],"base":"cmc stations","main":{"temp":286.15,"pressure":1019,"humidity":71,"temp_min":286.15,"temp_max":286.15},"wind":{"speed":7,"deg":140},"clouds":{"all":20},"dt":1458608400,"sys":{"type":1,"id":7452,"message":0.0091,"country":"CN","sunrise":1458597323,"sunset":1458641219},"id":1796236,"name":"Shanghai","cod":200}
 
 ## 参数
 
 * q: 城市名
-* APPID: f87dfd3af38ed44f157296b7150caacc 是我预先申请的ID，限制是每10分钟600次，可满足开发要求
+* APPID: xxxxxxxxxxx 是我预先申请的ID，限制是每10分钟600次，可满足开发要求
